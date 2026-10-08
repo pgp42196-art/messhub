@@ -1,0 +1,21 @@
+# One-click deploy: Render dashboard -> New -> Blueprint -> pick this repo.
+services:
+  - type: web
+    name: messhub
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase: { name: messhub-db, property: connectionString }
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false   # you type this in the dashboard
+      - key: STAFF_PASSWORD
+        sync: false
+databases:
+  - name: messhub-db
+    plan: free

@@ -451,17 +451,20 @@ if (!(await db.query('SELECT 1 FROM stores LIMIT 1')).rows.length) {
   await db.query("INSERT INTO stores (id,name,emoji,note) VALUES (1,'Night Mess','🌙','Late-night food, shakes & snacks'),(2,'C3','🏪','Quick snacks & drinks')");
   await db.query("SELECT setval(pg_get_serial_sequence('stores','id'), 2)");
 }
+// In production set ADMIN_PASSWORD / STAFF_PASSWORD so the well-known defaults never go live.
+const ADMIN_PW = process.env.ADMIN_PASSWORD || 'admin123';
+const STAFF_PW = process.env.STAFF_PASSWORD;
 const seedUsers = [
-  ['admin', 'admin', 'Admin', 'admin123', null],
-  ['pos', 'pos', 'Night Mess Counter', 'pos123', 1],
-  ['pos-c3', 'pos-c3', 'C3 Counter', 'pos123', 2],
-  ['runner', 'runner', 'Room Runner', 'runner123', null],
+  ['admin', 'admin', 'Admin', ADMIN_PW, null],
+  ['pos', 'pos', 'Night Mess Counter', STAFF_PW || 'pos123', 1],
+  ['pos-c3', 'pos-c3', 'C3 Counter', STAFF_PW || 'pos123', 2],
+  ['runner', 'runner', 'Room Runner', STAFF_PW || 'runner123', null],
 ];
 for (const [role, login, name, pw, store] of seedUsers) {
   await db.query('INSERT INTO users (role,login,name,pass_hash,store_id) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (login) DO NOTHING',
     [role.startsWith('pos') ? 'pos' : role, login, name, await hashPw(pw), store]);
 }
-if (!(await db.query("SELECT 1 FROM users WHERE role='student' LIMIT 1")).rows.length) {
+if (process.env.NODE_ENV !== 'production' && !(await db.query("SELECT 1 FROM users WHERE role='student' LIMIT 1")).rows.length) {
   await db.query("INSERT INTO users (role,login,name,pass_hash,room,credit_limit) VALUES ('student','demo','Demo Student',$1,'17001',0)", [await hashPw('demo123')]);
 }
 if (!menu.length) {
