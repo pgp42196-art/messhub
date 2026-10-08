@@ -1,0 +1,1 @@
+{"name":"messhub","version":"1.0.0","type":"module","private":true,"scripts":{"start":"node server/index.js","loadtest":"node scripts/loadtest.js"},"dependencies":{"@electric-sql/pglite":"^0.5.8","@fastify/jwt":"^10.2.3","@fastify/static":"^10.1.5","fastify":"^5.12.5","pg":"^8.23.1"}}

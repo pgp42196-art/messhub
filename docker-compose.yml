@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: mess
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me}
+      POSTGRES_DB: mess
+    command: postgres -c max_connections=200 -c shared_buffers=256MB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://mess:${DB_PASSWORD:-change-me}@db:5432/mess
+      JWT_SECRET: ${JWT_SECRET:-change-this-long-random-string}
+      PG_POOL: 40
+    ports:
+      - "80:3000"
+volumes:
+  pgdata:
