@@ -1,4 +1,5 @@
-# One-click deploy: Render dashboard -> New -> Blueprint -> pick this repo.
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repo.
+# Database is external (Neon); paste its connection string as DATABASE_URL.
 services:
   - type: web
     name: messhub
@@ -8,14 +9,13 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PG_POOL
+        value: "10"
       - key: DATABASE_URL
-        fromDatabase: { name: messhub-db, property: connectionString }
+        sync: false   # Neon connection string (ends with ?sslmode=require)
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_PASSWORD
-        sync: false   # you type this in the dashboard
+        sync: false
       - key: STAFF_PASSWORD
         sync: false
-databases:
-  - name: messhub-db
-    plan: free

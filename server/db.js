@@ -11,7 +11,10 @@ export async function openDb() {
     const pool = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
       max: Number(process.env.PG_POOL) || 20,
+      idleTimeoutMillis: 10000, // serverless Postgres (Neon) drops idle connections; recycle before it does
+      connectionTimeoutMillis: 30000, // allow for Neon waking from suspend
     });
+    pool.on('error', (e) => console.error('idle db client error:', e.message)); // must be handled or Node exits
     await pool.query(schema);
     return {
       kind: 'postgres',
